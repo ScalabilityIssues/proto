@@ -1,0 +1,50 @@
+syntax = "proto3";
+package airports;
+
+service Airports {
+    rpc ListAirports(Empty) returns (AirportList);
+    rpc GetAirport(IdQuery) returns (AirportRead);
+    rpc CreateAirport(AirportCreate) returns (AirportRead);
+    rpc DeleteAirport(IdQuery) returns (Empty);
+    rpc UpdateAirport(AirportUpdate) returns (AirportRead);
+}
+
+message Empty {}
+
+message IdQuery {
+    string id = 1;
+}
+
+message AirportList {
+    repeated AirportRead airports = 1;
+}
+
+message AirportCreate {
+    string icao = 1;
+    string iata = 2;
+    string name = 3;
+    string country = 4;
+    string city = 5;
+}
+
+message AirportPatch {
+    optional string icao = 1;
+    optional string iata = 2;
+    optional string name = 3;
+    optional string country = 4;
+    optional string city = 5;
+}
+
+message AirportUpdate {
+    string id = 1;
+    AirportPatch patch = 2; 
+}
+
+message AirportRead {
+    string id = 1;
+    string icao = 2;
+    string iata = 3;
+    string name = 4;
+    string country = 5;
+    string city = 6;
+}
