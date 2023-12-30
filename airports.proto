@@ -1,22 +1,22 @@
 syntax = "proto3";
-package airports;
+package flightmngr;
+
+import "google/protobuf/empty.proto";
 
 service Airports {
-    rpc ListAirports(Empty) returns (AirportList);
-    rpc GetAirport(IdQuery) returns (AirportRead);
+    rpc ListAirports(google.protobuf.Empty) returns (AirportList);
+    rpc GetAirport(AirportQuery) returns (AirportRead);
     rpc CreateAirport(AirportCreate) returns (AirportRead);
-    rpc DeleteAirport(IdQuery) returns (Empty);
+    rpc DeleteAirport(AirportQuery) returns (google.protobuf.Empty);
     rpc UpdateAirport(AirportUpdate) returns (AirportRead);
-}
-
-message Empty {}
-
-message IdQuery {
-    string id = 1;
 }
 
 message AirportList {
     repeated AirportRead airports = 1;
+}
+
+message AirportQuery {
+    string id = 1;
 }
 
 message AirportCreate {

@@ -1,22 +1,22 @@
 syntax = "proto3";
-package planes;
+package flightmngr;
+
+import "google/protobuf/empty.proto";
 
 service Planes {
-    rpc ListPlanes(Empty) returns (PlaneList);
-    rpc GetPlane(IdQuery) returns (PlaneRead);
+    rpc ListPlanes(google.protobuf.Empty) returns (PlaneList);
+    rpc GetPlane(PlaneQuery) returns (PlaneRead);
     rpc CreatePlane(PlaneCreate) returns (PlaneRead);
-    rpc DeletePlane(IdQuery) returns (Empty);
+    rpc DeletePlane(PlaneQuery) returns (google.protobuf.Empty);
     rpc UpdatePlane(PlaneUpdate) returns (PlaneRead);
-}
-
-message Empty {}
-
-message IdQuery {
-    string id = 1;
 }
 
 message PlaneList {
     repeated PlaneRead planes = 1;
+}
+
+message PlaneQuery {
+    string id = 1;
 }
 
 message PlaneCreate {
