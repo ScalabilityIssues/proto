@@ -1,0 +1,40 @@
+syntax = "proto3";
+package flightmngr;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+
+service Flights {
+    rpc ListFlights(google.protobuf.Empty) returns (FlightList);
+    rpc GetFlight(FlightQuery) returns (Flight);
+    rpc CreateFlight(Flight) returns (Flight);
+    rpc DeleteFlight(FlightQuery) returns (google.protobuf.Empty);
+    rpc UpdateFlight(FlightUpdate) returns (Flight);
+}
+
+message Flight{
+    string id = 1;
+    string plane_id = 2;
+    string origin_id = 3;
+    string destination_id = 4;
+    google.protobuf.Timestamp departure_time = 5;
+    google.protobuf.Timestamp arrival_time = 6;
+    string departure_gate = 7;
+    string arrival_gate = 8;
+    string status = 9;
+}
+
+message FlightList {
+    repeated Flight flights = 1;
+}
+
+message FlightQuery {
+    string id = 1;
+}
+
+message FlightUpdate {
+    string id = 1;
+    Flight update = 2;
+    google.protobuf.FieldMask update_mask = 3;
+}
