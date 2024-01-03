@@ -2,46 +2,34 @@ syntax = "proto3";
 package flightmngr;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 
 service Planes {
     rpc ListPlanes(google.protobuf.Empty) returns (PlaneList);
-    rpc GetPlane(PlaneQuery) returns (PlaneRead);
-    rpc CreatePlane(PlaneCreate) returns (PlaneRead);
+    rpc GetPlane(PlaneQuery) returns (Plane);
+    rpc CreatePlane(Plane) returns (Plane);
     rpc DeletePlane(PlaneQuery) returns (google.protobuf.Empty);
-    rpc UpdatePlane(PlaneUpdate) returns (PlaneRead);
+    rpc UpdatePlane(PlaneUpdate) returns (Plane);
+}
+
+message Plane {
+    string id = 1;
+    string name = 2;
+    string model = 3;
+    int32 cabin_capacity = 4;
+    int32 cargo_capacity_kg = 5;
 }
 
 message PlaneList {
-    repeated PlaneRead planes = 1;
+    repeated Plane planes = 1;
 }
 
 message PlaneQuery {
     string id = 1;
 }
 
-message PlaneCreate {
-    string name = 1;
-    string model = 2;
-    int32 cabin_capacity = 3;
-    int32 cargo_capacity_kg = 4;
-}
-
-message PlanePatch {
-    optional string name = 1;
-    optional string model = 2;
-    optional int32 cabin_capacity = 3;
-    optional int32 cargo_capacity_kg = 4;
-}
-
 message PlaneUpdate {
     string id = 1;
-    PlanePatch patch = 2; 
-}
-
-message PlaneRead {
-    string id = 1;
-    string name = 2;
-    string model = 3;
-    int32 cabin_capacity = 4;
-    int32 cargo_capacity_kg = 5;
+    Plane update = 2; 
+    google.protobuf.FieldMask update_mask = 3;
 }
