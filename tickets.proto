@@ -1,0 +1,43 @@
+syntax = "proto3";
+package ticketsrvc;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+service Tickets{
+    rpc ListTickets(google.protobuf.Empty) returns (TicketList);
+    rpc GetTicket(TicketQuery) returns (Ticket);
+    rpc CreateTicket(Ticket) returns (Ticket);
+    rpc DeleteTicket(TicketQuery) returns (google.protobuf.Empty);
+    rpc UpdateTicket(TicketUpdate) returns (Ticket);
+}
+
+message Ticket{
+    string id = 1;
+    string flight_id = 2;
+    PassengerDetails passenger = 3;
+    google.protobuf.Timestamp reservation_datetime = 4;
+    uint32 estimated_cargo_weight = 5; 
+}
+
+message PassengerDetails{
+    string ssn = 1;
+    string name = 2;
+    string surname = 3;
+    google.protobuf.Timestamp birth_date = 4;
+}
+
+message TicketList{
+    repeated Ticket tickets = 1;
+}
+
+message TicketQuery{
+    string id = 1;
+}
+
+message TicketUpdate{
+    string id = 1;
+    Ticket update = 2;
+    google.protobuf.FieldMask update_mask = 3;
+}
