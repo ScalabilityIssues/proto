@@ -1,0 +1,16 @@
+syntax = "proto3";
+package mldata;
+
+service MLData {
+  rpc GetMLData (Request) returns (stream Response) {}
+}
+
+message Request {
+  string file_name = 1;
+}
+
+message Response {
+  bytes file_data = 2;
+}
+```
+

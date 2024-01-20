@@ -1,0 +1,26 @@
+syntax = "proto3";
+package priceestimator;
+
+import "google/protobuf/timestamp.proto";
+
+// Define the service
+service PriceEstimation {
+    rpc EstimatePrice(FlightDetails) returns (Prediction);
+}
+
+message FlightDetails {
+    string date = 1; // Date in YYYY-MM-DD format
+    string source = 2; // Source location
+    string destination = 3; // Destination location
+    google.protobuf.Timestamp departure_time = 4;
+    google.protobuf.Timestamp arrival_time = 5;
+    string duration = 6; // Duration of the trip
+    float price = 7; // Price of the trip
+
+    
+}
+
+// Define a message for the price estimation
+message Prediction {
+    float price = 1; // Estimated price
+}
