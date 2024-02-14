@@ -1,35 +1,78 @@
 syntax = "proto3";
 package flightmngr;
 
+import "google/api/field_behavior.proto";
 import "google/protobuf/empty.proto";
-import "google/protobuf/field_mask.proto";
 
+// Allows management of the kinds of planes that are present in the fleet.
+// Individual planes are not modeled, only the kinds of planes that are present in the fleet.
+// Planes are identified by their unique id, and are immutable, so they cannot be updated once they are created.
+// Planes can only be soft-deleted, which means that they are not removed from the system,
+// but cannot be used to define new flights.
 service Planes {
-    rpc ListPlanes(google.protobuf.Empty) returns (PlaneList);
-    rpc GetPlane(PlaneQuery) returns (Plane);
-    rpc CreatePlane(Plane) returns (Plane);
-    rpc DeletePlane(PlaneQuery) returns (google.protobuf.Empty);
-    rpc UpdatePlane(PlaneUpdate) returns (Plane);
+
+	// Returns a list of all plane models
+	rpc ListPlanes(ListPlanesRequest) returns (ListPlanesResponse);
+
+	// Retrievee a plane model by its unique identifier.
+	rpc GetPlane(GetPlaneRequest) returns (Plane);
+
+	// Create a new plane model.
+	rpc CreatePlane(CreatePlaneRequest) returns (Plane);
+
+	// Soft-delete a plane model.
+	rpc DeletePlane(DeletePlaneRequest) returns (google.protobuf.Empty);
 }
 
+// A plane model that is present in the fleet.
 message Plane {
-    string id = 1;
-    string name = 2;
-    string model = 3;
-    int32 cabin_capacity = 4;
-    int32 cargo_capacity_kg = 5;
+
+	// The unique identifier for the plane model.
+	// This is a UUID.
+	string id = 1 [
+    	(google.api.field_behavior) = IDENTIFIER
+  	];
+
+  	// The name of the plane model.
+	string model = 3 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+  	// The number of passengers that the plane can carry.
+	int32 cabin_capacity = 4 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+  	// The maximum weight of cargo that the plane can carry, in kg.
+	int32 cargo_capacity_kg = 5 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+  	// Whether the plane model has been soft-deleted.
+	bool deleted = 6 [
+		(google.api.field_behavior) = OUTPUT_ONLY
+	];
 }
 
-message PlaneList {
-    repeated Plane planes = 1;
+message ListPlanesRequest {
+	bool show_deleted = 1;
 }
 
-message PlaneQuery {
-    string id = 1;
+message ListPlanesResponse {
+	repeated Plane planes = 1;
 }
 
-message PlaneUpdate {
-    string id = 1;
-    Plane update = 2; 
-    google.protobuf.FieldMask update_mask = 3;
+message GetPlaneRequest {
+	string id = 1;
+}
+
+message CreatePlaneRequest {
+	Plane plane = 1;
+}
+
+message DeletePlaneRequest {
+	string id = 1;
 }
