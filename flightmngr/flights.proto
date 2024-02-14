@@ -1,40 +1,195 @@
 syntax = "proto3";
 package flightmngr;
 
+import "google/api/field_behavior.proto";
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/empty.proto";
-import "google/protobuf/field_mask.proto";
 
+// Allows scheduling flights, and managing flight status.
+// Individual instances of flights are modeled, meaning that a flight 
+// is a single instance of a plane flying from one location to another.
+// Flights can be altered by status updates, and are otherwise immutable.
 service Flights {
-    rpc ListFlights(google.protobuf.Empty) returns (FlightList);
-    rpc GetFlight(FlightQuery) returns (Flight);
-    rpc CreateFlight(Flight) returns (Flight);
-    rpc DeleteFlight(FlightQuery) returns (google.protobuf.Empty);
-    rpc UpdateFlight(FlightUpdate) returns (Flight);
+
+    // List all flights.
+    rpc ListFlights(ListFlightsRequest) returns (ListFlightsResponse);
+
+    // Search for flights by origin, destination and departure day.
+    rpc SearchFlights(SearchFlightsRequest) returns (ListFlightsResponse);
+
+    // Get a flight and its status by id.
+    rpc GetFlight(GetFlightRequest) returns (Flight);
+
+    // Define a new flight.
+    // The flight is immutable once created.
+    rpc CreateFlight(CreateFlightRequest) returns (Flight);
+
+    // Update the status of a flight by pushing a new event.
+    // This is the only way to alter or cancel a flight.
+    rpc UpdateFlight(UpdateFlightRequest) returns (Flight);
 }
 
+// A flight is a single instance of a plane flying from one location to another.
 message Flight{
-    string id = 1;
-    string plane_id = 2;
-    string origin_id = 3;
-    string destination_id = 4;
-    google.protobuf.Timestamp departure_time = 5;
-    google.protobuf.Timestamp arrival_time = 6;
-    string departure_gate = 7;
-    string arrival_gate = 8;
-    string status = 9;
+
+    // Unique identifier for the flight.
+    // This is a UUID.
+    string id = 1 [
+    	(google.api.field_behavior) = IDENTIFIER
+  	];
+
+    // The id of the plane model used for the flight.
+    string plane_id = 2 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+    // The id of the origin airport.
+    string origin_id = 3 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+    // The id of the destination airport.
+    string destination_id = 4 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+    
+    // The time the flight is scheduled to depart.
+    google.protobuf.Timestamp departure_time = 5 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+    
+    // The time the flight is scheduled to arrive.
+    google.protobuf.Timestamp arrival_time = 6 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+    
+    // A set of events that have occurred to the flight.
+    // This is a list of status events, ordered by the time they occurred at.
+    repeated FlightStatusEvent status_events = 7 [
+		(google.api.field_behavior) = OUTPUT_ONLY
+	];
+    
+    // Whether the flight has been cancelled.
+    // Derived from the status events.
+    bool is_cancelled = 8 [
+        (google.api.field_behavior) = OUTPUT_ONLY
+    ];
+
+    // The time the flight is expected to depart, including delays.
+    // Derived from the status events.
+    // Optional, refer to scheduled departure time if not present.
+    google.protobuf.Timestamp expected_departure_time = 9 [
+        (google.api.field_behavior) = OUTPUT_ONLY
+    ];
+
+    // The time the flight is expected to arrive, including delays.
+    // Derived from the status events.
+    // Optional, refer to scheduled arrival time if not present.
+    google.protobuf.Timestamp expected_arrival_time = 10 [
+        (google.api.field_behavior) = OUTPUT_ONLY
+    ];
+
+    // The gate the flight is expected to depart from.
+    // Derived from the status events.
+    // Optional, the information could not be available.
+    string departure_gate = 11 [
+        (google.api.field_behavior) = OUTPUT_ONLY
+    ];
+
+    // The gate the flight is expected to arrive at.
+    // Derived from the status events.
+    // Optional, the information could not be available.
+    string arrival_gate = 12 [
+        (google.api.field_behavior) = OUTPUT_ONLY
+    ];
 }
 
-message FlightList {
+// This models an event that has occurred to a flight.
+// Does not contain a flight id as it refers to the flight resource it is part of.
+message FlightStatusEvent {
+    
+    // The time the event occurred.
+    google.protobuf.Timestamp timestamp = 1  [
+		(google.api.field_behavior) = OUTPUT_ONLY
+	];
+
+    // The type of event that occurred.
+    oneof event {
+        FlightCancelled flight_cancelled = 2;
+        FlightDelayed flight_delayed = 3;
+        FlightGateDeparture flight_gate_departure = 4;
+        FlightGateArrival flight_gate_arrival = 5;        
+    }
+}
+
+// Represents that a flight has been cancelled.
+message FlightCancelled {
+
+    // Optional, the reason the flight was cancelled.
+    string reason = 1 [
+		(google.api.field_behavior) = IMMUTABLE
+	];
+}
+
+// Represents that a flight has been delayed.
+message FlightDelayed {
+
+    // The new time the flight is expected to depart.
+    google.protobuf.Timestamp arrival_time = 1 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+    // The new time the flight is expected to arrive.
+    google.protobuf.Timestamp departure_time = 2 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+}
+
+// Represents that a gate has been assigned to a flight for departure.
+message FlightGateDeparture {
+    string gate = 1 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+}
+
+// Represents that a gate has been assigned to a flight for arrival.
+message FlightGateArrival {
+    string gate = 1 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+}
+
+message ListFlightsRequest {
+    bool include_cancelled = 1;
+}
+
+message SearchFlightsRequest {
+    string origin_id = 1;
+    string destination_id = 2;
+    google.protobuf.Timestamp departure_day = 3;
+}
+
+message ListFlightsResponse {
     repeated Flight flights = 1;
 }
 
-message FlightQuery {
+message GetFlightRequest {
     string id = 1;
 }
 
-message FlightUpdate {
+message CreateFlightRequest {
+    Flight flight = 1;
+}
+
+message UpdateFlightRequest {
     string id = 1;
-    Flight update = 2;
-    google.protobuf.FieldMask update_mask = 3;
+    FlightStatusEvent status_event = 2;
 }
