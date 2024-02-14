@@ -1,37 +1,84 @@
 syntax = "proto3";
 package flightmngr;
 
+import "google/api/field_behavior.proto";
 import "google/protobuf/empty.proto";
-import "google/protobuf/field_mask.proto";
+
+// Allows management of airports that are served by the company
+// The airports are referenced with their id
+// Airports are immutable
+// The delete action performs a soft delete, that means that the deleted airport are still available but it is not possible to use them as departure or destination airports
 
 service Airports {
-    rpc ListAirports(google.protobuf.Empty) returns (AirportList);
-    rpc GetAirport(AirportQuery) returns (Airport);
-    rpc CreateAirport(Airport) returns (Airport);
-    rpc DeleteAirport(AirportQuery) returns (google.protobuf.Empty);
-    rpc UpdateAirport(AirportUpdate) returns (Airport);
+
+    // Returns a list of airports
+    rpc ListAirports(ListAirportsRequest) returns (AirportList);
+
+    // Returns an airport by its id
+    rpc GetAirport(GetAirportRequest) returns (Airport);
+
+    // Create an airport
+    rpc CreateAirport(CreateAirportRequest) returns (Airport);
+
+    // Soft delete an airport
+    rpc DeleteAirport(DeleteAirportRequest) returns (google.protobuf.Empty);
 }
 
 message Airport {
-    string id = 1;
-    string icao = 2;
-    string iata = 3;
-    string name = 4;
-    string country = 5;
-    string city = 6;
+
+    // The unique identifier for the airport model
+	// This is a UUID
+    string id = 1 [
+        (google.api.field_behavior) = IDENTIFIER
+    ];
+
+    // The ICAO code of the airport
+    string icao = 2 [
+        (google.api.field_behavior) = IMMUTABLE, 
+        (google.api.field_behavior) = REQUIRED
+    ];
+    
+    // The IATA code of the airport
+    string iata = 3 [
+        (google.api.field_behavior) = IMMUTABLE, 
+        (google.api.field_behavior) = REQUIRED
+    ];
+    
+    // The airport name
+    string name = 4 [
+        (google.api.field_behavior) = IMMUTABLE, 
+        (google.api.field_behavior) = REQUIRED
+    ];
+    
+    // The country the airport is located in
+    string country = 5 [
+        (google.api.field_behavior) = IMMUTABLE, 
+        (google.api.field_behavior) = REQUIRED
+    ];
+    
+    // The city the airport is located in
+    string city = 6 [
+        (google.api.field_behavior) = IMMUTABLE, 
+        (google.api.field_behavior) = REQUIRED
+    ]; 
 }
 
 message AirportList {
     repeated Airport airports = 1;
 }
 
-message AirportQuery {
+message ListAirportsRequest {
+    bool show_deleted = 1; 
+}
+
+message GetAirportRequest {
     string id = 1;
 }
 
-message AirportUpdate {
-    string id = 1;
-    Airport update = 2; 
-    google.protobuf.FieldMask update_mask = 3;
+message CreateAirportRequest {
+    Airport airport = 1;
 }
 
+message DeleteAirportRequest {
+    string id = 1;
+ }
