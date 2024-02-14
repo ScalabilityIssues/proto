@@ -14,7 +14,7 @@ service Planes {
 	// Returns a list of all plane models
 	rpc ListPlanes(ListPlanesRequest) returns (ListPlanesResponse);
 
-	// Retrievee a plane model by its unique identifier.
+	// Retrieve a plane model by its unique identifier.
 	rpc GetPlane(GetPlaneRequest) returns (Plane);
 
 	// Create a new plane model.
