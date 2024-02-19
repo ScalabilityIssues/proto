@@ -4,39 +4,107 @@ package ticketsrvc;
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
+import "google/api/field_behavior.proto";
 
+// Allows management of the tickets bought by users
+// Each ticket is identified by its own unique id
+// The passanger details can be modified, while the other fields are immutable
+// Tickets can be soft-deleted, which means that are not removed from the system, but are no longer considered valid
 service Tickets{
+
+    // Returns the list of all tickets
     rpc ListTickets(google.protobuf.Empty) returns (TicketList);
-    rpc GetTicket(TicketQuery) returns (Ticket);
-    rpc CreateTicket(Ticket) returns (Ticket);
-    rpc DeleteTicket(TicketQuery) returns (google.protobuf.Empty);
-    rpc UpdateTicket(TicketUpdate) returns (Ticket);
+
+    // Retrieve a ticket by its unique id
+    rpc GetTicket(GetTicketRequest) returns (Ticket);
+
+    // Create a new ticket
+    rpc CreateTicket(CreateTicketRequest) returns (Ticket);
+
+    // Soft-delete a ticket
+    rpc DeleteTicket(DeleteTicketRequest) returns (google.protobuf.Empty);
+
+    // Update a ticket
+    rpc UpdateTicket(UpdateTicketRequest) returns (Ticket);
 }
 
 message Ticket{
-    string id = 1;
-    string flight_id = 2;
-    PassengerDetails passenger = 3;
-    google.protobuf.Timestamp reservation_datetime = 4;
-    uint32 estimated_cargo_weight = 5; 
+    
+	// The unique identifier for the ticket
+	// This is a UUID
+    string id = 1 [
+    	(google.api.field_behavior) = IDENTIFIER
+  	];
+
+    // Unique public identifier that a user can use to refer to the ticket when visualizing or updating details
+    string url = 2 [
+    	(google.api.field_behavior) = OUTPUT_ONLY
+  	];
+
+    // The flight id the ticket refears to
+    string flight_id = 3 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+    // The passenger details
+    PassengerDetails passenger = 4 [
+		(google.api.field_behavior) = REQUIRED
+    ];
+
+    // The reservation datetime
+    google.protobuf.Timestamp reservation_datetime = 5 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+    // The estimated cargo weight that a passanger has bought
+    uint32 estimated_cargo_weight = 6 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
 }
 
 message PassengerDetails{
-    string ssn = 1;
-    string name = 2;
-    string surname = 3;
-    google.protobuf.Timestamp birth_date = 4;
+    string ssn = 1 [
+		(google.api.field_behavior) = REQUIRED
+	];
+
+    string name = 2 [
+		(google.api.field_behavior) = REQUIRED
+	];
+
+    string surname = 3 [
+		(google.api.field_behavior) = REQUIRED	
+    ];
+
+    google.protobuf.Timestamp birth_date = 4 [
+		(google.api.field_behavior) = REQUIRED
+    ];
+
+    string email = 5 [
+		(google.api.field_behavior) = REQUIRED	
+    ];
 }
 
 message TicketList{
     repeated Ticket tickets = 1;
 }
 
-message TicketQuery{
+message GetTicketRequest{
+  string id = 1;
+  
+}
+
+message DeleteTicketRequest{
     string id = 1;
 }
 
-message TicketUpdate{
+message CreateTicketRequest{
+  Ticket ticket = 1;
+}
+
+message UpdateTicketRequest{
     string id = 1;
     Ticket update = 2;
     google.protobuf.FieldMask update_mask = 3;
