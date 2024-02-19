@@ -65,23 +65,30 @@ message Ticket{
 	];
 }
 
+// Models the passenger owner of the ticket
 message PassengerDetails{
+
+    // The SSN of the passenger
     string ssn = 1 [
 		(google.api.field_behavior) = REQUIRED
 	];
 
+    // The name of the passenger
     string name = 2 [
 		(google.api.field_behavior) = REQUIRED
 	];
 
+    // The surname of the passenger
     string surname = 3 [
 		(google.api.field_behavior) = REQUIRED	
     ];
 
+    // The birth date of the passenger. The time part is not relevant
     google.protobuf.Timestamp birth_date = 4 [
 		(google.api.field_behavior) = REQUIRED
     ];
 
+    // The user email
     string email = 5 [
 		(google.api.field_behavior) = REQUIRED	
     ];
