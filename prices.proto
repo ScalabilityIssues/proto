@@ -1,26 +1,64 @@
 syntax = "proto3";
 package priceestimator;
 
+import "google/api/field_behavior.proto";
 import "google/protobuf/timestamp.proto";
 
-// Define the service
+// This service is used for price estimation of flights
 service PriceEstimation {
-    rpc EstimatePrice(FlightDetails) returns (Prediction);
+
+    // Given details about the flight, returns a price estimation
+    rpc EstimatePrice(EstimatePriceRequest) returns (PricePrediction);
 }
 
+// Contains flight details
 message FlightDetails {
-    string date = 1; // Date in YYYY-MM-DD format
-    string source = 2; // Source location
-    string destination = 3; // Destination location
-    google.protobuf.Timestamp departure_time = 4;
-    google.protobuf.Timestamp arrival_time = 5;
-    string duration = 6; // Duration of the trip
-    float price = 7; // Price of the trip
 
+    // IATA source location
+    string source = 1 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+    // IATA destination location
+    string destination = 2 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
     
+    // Departure datetime
+    google.protobuf.Timestamp departure_time = 3 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+    // Arrival datetime
+    google.protobuf.Timestamp arrival_time = 4 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
 }
 
-// Define a message for the price estimation
-message Prediction {
-    float price = 1; // Estimated price
+// Contains the details of a flight for which a price estimation is requested
+message EstimatePriceRequest{
+    FlightDetails flight = 1 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+}
+
+// Prediciton response
+message PricePrediction {
+
+    // Estimated price
+    float price = 1 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
+
+    // Currency in which the price is expressed
+    string currency = 2 [
+		(google.api.field_behavior) = REQUIRED,
+		(google.api.field_behavior) = IMMUTABLE
+	];
 }
