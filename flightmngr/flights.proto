@@ -96,14 +96,14 @@ message Flight{
     // The gate the flight is expected to depart from.
     // Derived from the status events.
     // Optional, the information could not be available.
-    string departure_gate = 11 [
+    optional string departure_gate = 11 [
         (google.api.field_behavior) = OUTPUT_ONLY
     ];
 
     // The gate the flight is expected to arrive at.
     // Derived from the status events.
     // Optional, the information could not be available.
-    string arrival_gate = 12 [
+    optional string arrival_gate = 12 [
         (google.api.field_behavior) = OUTPUT_ONLY
     ];
 }
@@ -137,18 +137,18 @@ message FlightCancelled {
 
 // Represents that a flight has been delayed.
 message FlightDelayed {
-
+    
     // The new time the flight is expected to depart.
-    google.protobuf.Timestamp arrival_time = 1 [
-		(google.api.field_behavior) = REQUIRED,
-		(google.api.field_behavior) = IMMUTABLE
-	];
+    google.protobuf.Timestamp departure_time = 2 [
+        (google.api.field_behavior) = REQUIRED,
+        (google.api.field_behavior) = IMMUTABLE
+    ];
 
     // The new time the flight is expected to arrive.
-    google.protobuf.Timestamp departure_time = 2 [
-		(google.api.field_behavior) = REQUIRED,
+    google.protobuf.Timestamp arrival_time = 1 [
+        (google.api.field_behavior) = REQUIRED,
 		(google.api.field_behavior) = IMMUTABLE
-	];
+    ];    
 }
 
 // Represents that a gate has been assigned to a flight for departure.
