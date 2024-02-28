@@ -40,13 +40,13 @@ message Plane {
 	];
 
   	// The number of passengers that the plane can carry.
-	int32 cabin_capacity = 4 [
+	uint32 cabin_capacity = 4 [
 		(google.api.field_behavior) = REQUIRED,
 		(google.api.field_behavior) = IMMUTABLE
 	];
 
   	// The maximum weight of cargo that the plane can carry, in kg.
-	int32 cargo_capacity_kg = 5 [
+	uint32 cargo_capacity_kg = 5 [
 		(google.api.field_behavior) = REQUIRED,
 		(google.api.field_behavior) = IMMUTABLE
 	];
