@@ -18,7 +18,7 @@ service Tickets{
     // Retrieve a ticket by its unique id
     rpc GetTicket(GetTicketRequest) returns (Ticket);
 
-    // Create a new ticket
+    // Create a new ticket if there at least one place free in the plane
     rpc CreateTicket(CreateTicketRequest) returns (Ticket);
 
     // Soft-delete a ticket
@@ -26,6 +26,9 @@ service Tickets{
 
     // Update a ticket
     rpc UpdateTicket(UpdateTicketRequest) returns (Ticket);
+
+    // Returns the statistics of a flight
+    rpc GetFlightStatistics(GetFlightStatisticsRequest) returns (FlightStatistics);
 }
 
 message Ticket{
@@ -115,4 +118,13 @@ message UpdateTicketRequest{
     string id = 1;
     Ticket update = 2;
     google.protobuf.FieldMask update_mask = 3;
+}
+
+message GetFlightStatisticsRequest{
+	string flight_id = 1;
+}
+
+message FlightStatistics{
+	uint32 total_seats = 1;
+	uint32 reserved_seats = 2;
 }
