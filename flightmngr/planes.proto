@@ -1,7 +1,7 @@
 syntax = "proto3";
 package flightmngr;
 
-import "google/api/field_behavior.proto";
+import "commons/field_behavior.proto";
 import "google/protobuf/empty.proto";
 
 // Allows management of the kinds of planes that are present in the fleet.

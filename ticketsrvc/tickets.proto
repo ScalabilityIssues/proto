@@ -4,7 +4,7 @@ package ticketsrvc;
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
-import "google/api/field_behavior.proto";
+import "commons/field_behavior.proto";
 
 // Allows management of the tickets bought by users
 // Each ticket is identified by its own unique id
