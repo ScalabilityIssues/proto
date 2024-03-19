@@ -9,11 +9,12 @@ import "commons/field_behavior.proto";
 // Allows management of the tickets bought by users
 // Each ticket is identified by its own unique id
 // The passanger details can be modified, while the other fields are immutable
-// Tickets can be soft-deleted, which means that are not removed from the system, but are no longer considered valid
+// Tickets are soft-deleted, which means that are not removed from the system, but are moved to another collection
+// The update is possible only on the passenger details; to modify other parameters just create a new ticket
 service Tickets{
 
     // Returns the list of all tickets
-    rpc ListTickets(google.protobuf.Empty) returns (TicketList);
+    rpc ListTickets(ListTicketsRequest) returns (TicketList);
 
     // Retrieve a ticket by its unique id
     rpc GetTicket(GetTicketRequest) returns (Ticket);
@@ -24,7 +25,7 @@ service Tickets{
     // Soft-delete a ticket
     rpc DeleteTicket(DeleteTicketRequest) returns (google.protobuf.Empty);
 
-    // Update a ticket
+    // Update a ticket (only passenger details)
     rpc UpdateTicket(UpdateTicketRequest) returns (Ticket);
 
     // Returns the statistics of a flight
@@ -33,39 +34,44 @@ service Tickets{
 
 message Ticket{
     
-	// The unique identifier for the ticket
-	// This is a UUID
+    // The unique identifier for the ticket
+    // This is a UUID
     string id = 1 [
-    	(google.api.field_behavior) = IDENTIFIER
-  	];
+        (google.api.field_behavior) = IDENTIFIER
+    ];
 
     // Unique public identifier that a user can use to refer to the ticket when visualizing or updating details
     string url = 2 [
-    	(google.api.field_behavior) = OUTPUT_ONLY
-  	];
+        (google.api.field_behavior) = OUTPUT_ONLY
+    ];
 
     // The flight id the ticket refears to
     string flight_id = 3 [
-		(google.api.field_behavior) = REQUIRED,
-		(google.api.field_behavior) = IMMUTABLE
-	];
+        (google.api.field_behavior) = REQUIRED,
+        (google.api.field_behavior) = IMMUTABLE
+    ];
 
     // The passenger details
     PassengerDetails passenger = 4 [
-		(google.api.field_behavior) = REQUIRED
+        (google.api.field_behavior) = REQUIRED
     ];
 
     // The reservation datetime
     google.protobuf.Timestamp reservation_datetime = 5 [
-		(google.api.field_behavior) = REQUIRED,
-		(google.api.field_behavior) = IMMUTABLE
-	];
+        (google.api.field_behavior) = REQUIRED,
+        (google.api.field_behavior) = IMMUTABLE
+    ];
 
     // The estimated cargo weight that a passanger has bought
     uint32 estimated_cargo_weight = 6 [
-		(google.api.field_behavior) = REQUIRED,
-		(google.api.field_behavior) = IMMUTABLE
-	];
+        (google.api.field_behavior) = REQUIRED,
+        (google.api.field_behavior) = IMMUTABLE
+    ];
+
+    // The validity of the ticket
+    TicketStatus ticket_status = 7 [
+        (google.api.field_behavior) = OUTPUT_ONLY
+    ];
 }
 
 // Models the passenger owner of the ticket
@@ -73,37 +79,46 @@ message PassengerDetails{
 
     // The SSN of the passenger
     string ssn = 1 [
-		(google.api.field_behavior) = REQUIRED
-	];
+        (google.api.field_behavior) = REQUIRED
+    ];
 
     // The name of the passenger
     string name = 2 [
-		(google.api.field_behavior) = REQUIRED
-	];
+        (google.api.field_behavior) = REQUIRED
+    ];
 
     // The surname of the passenger
     string surname = 3 [
-		(google.api.field_behavior) = REQUIRED	
+        (google.api.field_behavior) = REQUIRED	
     ];
 
     // The birth date of the passenger. The time part is not relevant
     google.protobuf.Timestamp birth_date = 4 [
-		(google.api.field_behavior) = REQUIRED
+        (google.api.field_behavior) = REQUIRED
     ];
 
     // The user email
     string email = 5 [
-		(google.api.field_behavior) = REQUIRED	
+        (google.api.field_behavior) = REQUIRED	
     ];
 }
+
+enum TicketStatus {
+    valid = 0;
+    deleted = 1;
+  }
 
 message TicketList{
     repeated Ticket tickets = 1;
 }
 
+message ListTicketsRequest{
+    bool include_nonvalid = 1;
+}
+
 message GetTicketRequest{
-  string id = 1;
-  
+    string id = 1;
+    bool allow_nonvalid = 2;
 }
 
 message DeleteTicketRequest{
@@ -111,7 +126,7 @@ message DeleteTicketRequest{
 }
 
 message CreateTicketRequest{
-  Ticket ticket = 1;
+    Ticket ticket = 1;
 }
 
 message UpdateTicketRequest{
@@ -121,10 +136,10 @@ message UpdateTicketRequest{
 }
 
 message GetFlightStatisticsRequest{
-	string flight_id = 1;
+    string flight_id = 1;
 }
 
 message FlightStatistics{
-	uint32 total_seats = 1;
-	uint32 reserved_seats = 2;
+    uint32 total_seats = 1;
+    uint32 reserved_seats = 2;
 }
