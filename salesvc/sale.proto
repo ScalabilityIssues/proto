@@ -1,0 +1,30 @@
+syntax = "proto3";
+package salesvc;
+
+import "flightmngr/flights.proto";
+
+service Sale {
+    rpc SearchOffers(SearchOffersRequest) returns (SearchOffersResponse);
+}
+
+message SearchOffersRequest {
+    string departure_airport = 1;
+    string arrival_airport = 2;
+    string departure_date = 3;    
+}
+
+message SearchOffersResponse {
+    repeated Offer offers = 1;
+}
+
+message Offer {
+    flightmngr.Flight flight = 1;
+    Money price = 2;
+    string token = 3;
+}
+
+// TODO: move to a common proto file
+message Money {
+    string currency = 1;
+    int32 amount = 2;
+}
